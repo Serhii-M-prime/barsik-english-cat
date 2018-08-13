@@ -105,6 +105,9 @@ def handle_next(message):
         else:
             translations = strToList(result['t_' + user['lang'].lower()])
             bot.send_message(id, getRandom(M["mes5"][user['lang']]).format(word=getRandom(translations)), parse_mode="HTML")
+            hint = question['hint_' + user['lang'].lower()]
+            if hint is not None:
+                bot.send_message(i['id'], getRandom(M["mes11"][user['lang']]).format(hint=hint), parse_mode="HTML")
 
 @bot.message_handler(commands=['score'])
 def handle_score(message):
