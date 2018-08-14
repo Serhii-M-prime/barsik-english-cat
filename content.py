@@ -61,7 +61,7 @@ Stikers = {
         "CAADAgADTgEAAhhC7giduMHmD4TX2wI",
         "CAADAgADQgAD-Aq8ArQZxZTephsVAg",
         "CAADAgADvwkAAvFCvwXG8S9ISr5BJAI",
-        "CAADAgADTgEAAhhC7giduMHmD4TX2wICAADAgADIgIAAjbsGwXVUP0CFkcplgI",
+        #"CAADAgADTgEAAhhC7giduMHmD4TX2wICAADAgADIgIAAjbsGwXVUP0CFkcplgI",
         "CAADAgADuAEAAo5EEQJ_5tCJee1YugI"
     ]
 }
