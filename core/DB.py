@@ -5,7 +5,7 @@ SQL - contain methods for db connections and send base queries.
 Queries - contain all sql request for telegram bot.
 """
 import time
-import config as c
+import core.config as c
 import mysql.connector as mysql
 
 

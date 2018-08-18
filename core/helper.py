@@ -1,6 +1,6 @@
 import random
 import time
-from DB import Queries as Query
+from core.DB import Queries as Query
 
 
 def get_random(data):

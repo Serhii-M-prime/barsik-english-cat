@@ -1,7 +1,7 @@
-from DB import Queries as Query
-import config as c
-from helper import *
-from content import messages as msg, stickers as stk, desc
+from core.DB import Queries as Query
+import core.config as c
+from core.helper import *
+from core.content import messages as msg, stickers as stk, desc
 import telebot
 
 bot = telebot.TeleBot(c.TOKEN)
