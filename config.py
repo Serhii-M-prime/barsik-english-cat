@@ -17,8 +17,8 @@ DB_NAME = os.environ.get('DB_NAME', None)
 resend_time = 60
 # Word learned score constant
 word_score = 5
-# Time after freez in deys
+# Time after freeze in days
 carma = 5
 
-# languages
+# supported languages
 languages = ['UA', 'RU']

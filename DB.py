@@ -5,7 +5,7 @@ SQL - contain methods for db connections and send base queries.
 Queries - contain all sql request for telegram bot.
 """
 import time
-import config_dev as c
+import config as c
 import mysql.connector as mysql
 
 
@@ -62,11 +62,32 @@ class SQL:
 
 
 class Queries(SQL):
+    """Queries for telegram bot.
 
-    def getUsersList(self):
-        """Get list with active users
+        Class with all queries for telegram bot.
 
-        ldfm
+        Methods:
+            get_users_list: Get list with active users.
+            set_word_id: Set asked word id to user.
+            get_words_list: Return list with user's words.
+            get_answer: Return info about word by id.
+            change_user_status: Set user active status.
+            add_user: Set new user to db.
+            set_user_word: Set asked word id to user row.
+            update_user_word: Set new word id to user without answer.
+            update_last_ask: Update asked word state.
+            change_carma: Set carma value to user.
+            check_user: Check user exist in table.
+            get_user_by_id: Return user data by id.
+            get_score: Get users score table.
+            change_user_lang: Set user's language.
+        """
+
+    def get_users_list(self):
+        """Get list with active users.
+
+        Get list with all active users with good carma
+        and which answered to previous question.
         :return: array with list with results
         """
         sql = """
@@ -85,7 +106,12 @@ class Queries(SQL):
         result = self.select(sql, bind)
         return result
 
-    def setWorldId(self, data):
+    def set_word_id(self, data):
+        """Set asked word id to user.
+
+        :param data: int
+        :return: void
+        """
         sql = """
             UPDATE users
             SET w_id = %(w_id)s, send_time = %(time)s
@@ -93,7 +119,12 @@ class Queries(SQL):
             """
         self.insert(sql, data)
 
-    def getWordsList(self, user_id):
+    def get_words_list(self, user_id):
+        """Return list with user's words.
+
+        :param user_id: int
+        :return: list
+        """
         sql = """
         SELECT
         words.id,
@@ -111,13 +142,18 @@ class Queries(SQL):
         OR last_ask is null ))
         OR (user_id is null)
         """
-        data = {}
+        data = dict()
         data['word_score'] = c.word_score
         data['user_id'] = user_id
         result = self.select(sql, data)
         return result 
     
-    def getAnswer(self, id):
+    def get_answer(self, word_id):
+        """Return info about word by id.
+
+        :param word_id: int
+        :return: dict
+        """
         sql = """
         SELECT
         words.en as answer,
@@ -126,11 +162,17 @@ class Queries(SQL):
         LEFT JOIN words ON users.w_id = words.id
         WHERE users.id = %(id)s
         """
-        bind = {'id': id}
+        bind = {'id': word_id}
         result = self.select(sql, bind)
         return result[0]
 
-    def changeUserStatus(self, id, status):
+    def change_user_status(self, user_id, status):
+        """Set user active status.
+
+        :param user_id: int
+        :param status: int (1||0)
+        :return: void
+        """
         sql = """
         UPDATE users
         SET is_active = %(status)s
@@ -138,11 +180,16 @@ class Queries(SQL):
         """
         bind = {
             "status": status,
-            "id": id
+            "id": user_id
         }
         self.insert(sql, bind)
 
-    def addUser(self, data):
+    def add_user(self, data):
+        """Set new user to db.
+
+        :param data: dict
+        :return: void
+        """
         sql = """
         INSERT INTO users (id, nickname, lang, is_active, carma)
         VALUES (%(id)s, %(nickname)s, %(lang)s, %(is_active)s, %(carma)s);
@@ -156,7 +203,13 @@ class Queries(SQL):
         }
         self.insert(sql, bind)
 
-    def setUserWord(self, user_id, world_id):
+    def set_user_word(self, user_id, world_id):
+        """Set asked word id to user row.
+
+        :param user_id:
+        :param world_id:
+        :return: void
+        """
         sql = """
         INSERT INTO users_worlds (user_id, world_id, score, last_ask)
         VALUES (%(user_id)s, %(world_id)s, %(score)s, %(last_ask)s);
@@ -169,8 +222,14 @@ class Queries(SQL):
         }
         self.insert(sql, bind)
     
-    def updateUserWord(self, world_id, user_id, score: bool):
-        
+    def update_user_word(self, world_id, user_id, score: bool):
+        """Set new word id to user without answer.
+
+        :param world_id: int
+        :param user_id: int
+        :param score: bool
+        :return: void
+        """
         if score:
             condition = "SET score = score + 1"
         else:
@@ -184,7 +243,13 @@ class Queries(SQL):
         }
         self.insert(sql, bind)
 
-    def updateLastAsk(self, user_id, world_id):
+    def update_last_ask(self, user_id, world_id):
+        """Update asked word state.
+
+        :param user_id: int
+        :param world_id: int
+        :return: void
+        """
         sql = """
             UPDATE users_worlds
             SET last_ask = %(last_ask)s
@@ -198,8 +263,13 @@ class Queries(SQL):
         }
         self.insert(sql, bind)
     
-    def changeCarma(self, id: int, carma: bool):
+    def change_carma(self, user_id: int, carma: bool):
+        """Set carma value to user.
 
+        :param user_id: int
+        :param carma: bool
+        :return: void
+        """
         if carma is True:
             condition = "SET carma = 0"
         else:
@@ -207,11 +277,16 @@ class Queries(SQL):
 
         sql = "UPDATE users " + condition + " WHERE id = %(id)s"
         bind = {
-            "id": id
+            "id": user_id
         }
         self.insert(sql, bind)
     
-    def checkUser(self, user_id):
+    def check_user(self, user_id):
+        """Check user exist in table.
+
+        :param user_id: int
+        :return: bool
+        """
         sql = """
         SELECT
         *
@@ -230,7 +305,12 @@ class Queries(SQL):
 
         return response
 
-    def getUserById(self, id):
+    def get_user_by_id(self, user_id):
+        """Return user data by id.
+
+        :param user_id: int
+        :return: dict
+        """
         sql = """
             SELECT
             *
@@ -238,12 +318,16 @@ class Queries(SQL):
             WHERE id = %(id)s
             """
         bind = {
-            'id': id
+            'id': user_id
             }
         result = self.select(sql, bind)
         return result[0]
 
-    def getScore(self):
+    def get_score(self):
+        """Get users score table.
+
+        :return: list
+        """
         sql = """
         SELECT users.nickname, SUM(users_worlds.score) as score FROM users_worlds
         LEFT JOIN users ON users_worlds.user_id = users.id
@@ -254,7 +338,13 @@ class Queries(SQL):
         result = self.select(sql, bind)
         return result
 
-    def changeUserLang(self, id, lang):
+    def change_user_lang(self, user_id, lang):
+        """Set user's language.
+
+        :param user_id:
+        :param lang:
+        :return: void
+        """
         sql = """
         UPDATE users
         SET lang = %(lang)s
@@ -262,6 +352,6 @@ class Queries(SQL):
         """
         bind = {
             "lang": lang,
-            "id": id
+            "id": user_id
         }
         self.insert(sql, bind)
