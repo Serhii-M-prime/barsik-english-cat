@@ -1,21 +1,46 @@
+"""Module with all needed for works with db.
+
+Class:
+SQL - contain methods for db connections and send base queries.
+Queries - contain all sql request for telegram bot.
+"""
 import time
-import config_prod as c
+import config_dev as c
 import mysql.connector as mysql
 
+
 class SQL:
+    """MySQL connector.
+
+    Class for initialize and close data base connection and get methods for
+    insert and select data to data base.
+
+    Methods:
+        select: Create read query.
+        insert: Create write query.
+
+    """
 
     def __init__(self):
+        """Set connection parameters."""
         self.db = mysql.connect(
-            host = c.DB_HOST,
-            user = c.DB_USERNAME,
-            passwd = c.DB_PASSWORD,
-            database = c.DB_NAME
+            host=c.DB_HOST,
+            user=c.DB_USERNAME,
+            passwd=c.DB_PASSWORD,
+            database=c.DB_NAME
             )
 
     def __del__(self):
+        """Close MySql connection anter deleting exemplar."""
         self.db.close()
-    
+
     def select(self, sql, bind):
+        """Create read query.
+
+        :param sql: sql query.
+        :param bind: parameters for bind to sql query.
+        :return: array with query result.
+        """
         cursor = self.db.cursor(dictionary=True)
         cursor.execute(sql, bind)
         result = cursor.fetchall()
@@ -23,15 +48,27 @@ class SQL:
         return result
 
     def insert(self, sql, bind):
+        """Create write query.
+
+        :param sql: sql query.
+        :param bind: parameters for bind to sql query.
+        :return: array with query result.
+        """
         cursor = self.db.cursor()
         cursor.execute(sql, bind)
         self.db.commit()
         cursor.close()
         return
 
+
 class Queries(SQL):
 
     def getUsersList(self):
+        """Get list with active users
+
+        ldfm
+        :return: array with list with results
+        """
         sql = """
             SELECT
             id,
@@ -66,9 +103,12 @@ class Queries(SQL):
         words.hint_ru,
         users.id as flag
         FROM words
-        LEFT JOIN (SELECT * FROM users_worlds where user_id = %(user_id)s) as one_user ON one_user.world_id = words.id
+        LEFT JOIN (SELECT * FROM users_worlds where user_id = %(user_id)s)
+        as one_user ON one_user.world_id = words.id
         LEFT JOIN users ON one_user.user_id = users.id
-        WHERE (user_id = %(user_id)s AND one_user.score < %(word_score)s AND (date_add(last_ask, INTERVAL 24 HOUR) < current_timestamp() OR last_ask is null ))
+        WHERE (user_id = %(user_id)s AND one_user.score < %(word_score)s
+        AND (date_add(last_ask, INTERVAL 24 HOUR) < current_timestamp()
+        OR last_ask is null ))
         OR (user_id is null)
         """
         data = {}
@@ -131,9 +171,9 @@ class Queries(SQL):
     
     def updateUserWord(self, world_id, user_id, score: bool):
         
-        if score :
+        if score:
             condition = "SET score = score + 1"
-        else :
+        else:
             condition = "SET score = score - 1"
 
         sql = "UPDATE users_worlds " + condition + "\
@@ -162,7 +202,7 @@ class Queries(SQL):
 
         if carma is True:
             condition = "SET carma = 0"
-        else :
+        else:
             condition = "SET carma = carma + 1"
 
         sql = "UPDATE users " + condition + " WHERE id = %(id)s"
@@ -185,7 +225,7 @@ class Queries(SQL):
 
         if not result:
             response = False
-        else :
+        else:
             response = True
 
         return response
@@ -211,7 +251,7 @@ class Queries(SQL):
         ORDER BY score DESC
         """
         bind = {}
-        result = self.select(sql,bind)
+        result = self.select(sql, bind)
         return result
 
     def changeUserLang(self, id, lang):
