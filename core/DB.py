@@ -81,6 +81,7 @@ class Queries(SQL):
             get_user_by_id: Return user data by id.
             get_score: Get users score table.
             change_user_lang: Set user's language.
+            get_slipping_user: Get users which don't more then time
         """
 
     def get_users_list(self):
@@ -271,7 +272,7 @@ class Queries(SQL):
         :return: void
         """
         if carma is True:
-            condition = "SET carma = 0"
+            condition = "SET carma = IF(carma = 0, 0, carma - 1)"
         else:
             condition = "SET carma = carma + 1"
 
@@ -355,3 +356,23 @@ class Queries(SQL):
             "id": user_id
         }
         self.insert(sql, bind)
+
+    def get_slipping_user(self):
+        """Get users which don't more then time
+
+        :return: list
+        """
+        sql = """
+        SELECT 
+        id,
+        carma,
+        lang
+        FROM users
+        WHERE date_add(send_time, INTERVAL %(number)s HOUR) < current_timestamp()
+        AND is_active = 1
+        """
+        bind = {
+            "number": 24,
+        }
+        result = self.select(sql, bind)
+        return result

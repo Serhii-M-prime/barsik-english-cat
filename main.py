@@ -217,6 +217,7 @@ def handle_message(message):
                     )
                     bot.send_sticker(
                         message.from_user.id, get_random(stk["YES"]))
+                    query.change_carma(chat_id, True)
                 else:
                     query.update_user_word(
                         user['w_id'],
